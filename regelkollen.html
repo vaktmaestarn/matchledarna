@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Regelkollen – Matchledarna</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="main.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">Matchledarna</div>
+      <div class="tagline">Kunskap · Transparens · Gemenskap</div>
+    </div>
+    <nav id="nav-menu">
+      <a href="index.html">Hem</a>
+      <a href="kunskap.html">Kunskap</a>
+      <a href="diskussion.html">Diskussion</a>
+      <a href="stod.html">Stöd</a>
+    </nav>
+    <button id="hamburger" aria-label="Öppna meny" aria-expanded="false" aria-controls="nav-menu">☰</button>
+  </header>
+
+  <main class="rk-container">
+    <h1>Regelkollen</h1>
+    <p class="rk-intro">Sök i regelboken för bandy 2024/2025. Filtrera på regelnummer och taggar, eller skriv ett ord/fråga.</p>
+
+    <!-- Sök och filter -->
+    <div class="rk-controls">
+      <input id="rk-search" class="rk-input" type="search" placeholder="Sök t.ex. offside, straff, frislag…" aria-label="Sök i regler" />
+      <select id="rk-rule-filter" class="rk-select" aria-label="Filtrera på regelnummer">
+        <option value="">Alla regler</option>
+      </select>
+      <select id="rk-tag-filter" class="rk-select" aria-label="Filtrera på tagg">
+        <option value="">Alla taggar</option>
+      </select>
+    </div>
+
+    <div id="rk-count" class="rk-count"></div>
+
+    <!-- Resultat -->
+    <div id="rk-results" class="rk-results" role="list"></div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Matchledarna</p>
+  </footer>
+
+  <script>
+    const normalize = (s) =>
+      s.toLowerCase()
+       .normalize('NFD')
+       .replace(/[\u0300-\u036f]/g, ''); // åäö -> aao (hjälper enkel sökning)
+
+    const state = {
+      allRules: [],
+      query: "",
+      ruleFilter: "",
+      tagFilter: ""
+    };
+
+    const elSearch = document.getElementById('rk-search');
+    const elRuleFilter = document.getElementById('rk-rule-filter');
+    const elTagFilter = document.getElementById('rk-tag-filter');
+    const elResults = document.getElementById('rk-results');
+    const elCount = document.getElementById('rk-count');
+
+    // Ladda data
+    fetch('data/regler.json')
+      .then(r => r.json())
+      .then(data => {
+        state.allRules = data.rules || [];
+        buildFilters(state.allRules);
+        // Om #hash pekar på en regel, förifyll
+        const hashId = location.hash?.replace('#','');
+        if (hashId) {
+          const hit = state.allRules.find(r => r.id === hashId);
+          if (hit) {
+            state.query = ""; // tom sök
+            render();
+            // Scrolla till träffen när den finns i DOM
+            setTimeout(() => {
+              const target = document.getElementById(hashId);
+              if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+            return;
+          }
+        }
+        render();
+      })
+      .catch(err => {
+        elResults.innerHTML = `<div class="rk-error">Kunde inte ladda regler.json. Kontrollera sökvägen.</div>`;
+        console.error(err);
+      });
+
+    function buildFilters(rules) {
+      // Bygg regelnummer-lista
+      const nums = Array.from(new Set(rules.map(r => r.rule_number))).filter(Boolean).sort((a,b)=> {
+        // sortera numeriskt när det går
+        return (parseFloat(a) || 0) - (parseFloat(b) || 0);
+      });
+      for (const n of nums) {
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = `Regel ${n}`;
+        elRuleFilter.appendChild(opt);
+      }
+      // Bygg taggar
+      const tags = Array.from(new Set(rules.flatMap(r => r.tags || []))).sort((a,b)=>a.localeCompare(b,'sv'));
+      for (const t of tags) {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        elTagFilter.appendChild(opt);
+      }
+    }
+
+    function searchRules() {
+      const q = normalize(state.query);
+      return state.allRules.filter(r => {
+        // filter på regelnummer
+        if (state.ruleFilter && r.rule_number !== state.ruleFilter) return false;
+        // filter på tagg
+        if (state.tagFilter && !(r.tags||[]).includes(state.tagFilter)) return false;
+
+        if (!q) return true; // ingen text-sök
+
+        const hay = [
+          r.title || "",
+          r.rule_number || "",
+          r.body || "",
+          (r.tags||[]).join(" ")
+        ].map(normalize).join(" ");
+        return hay.includes(q);
+      });
+    }
+
+    function highlight(text, query) {
+      if (!query) return text;
+      // enkel highlight (case/diakritik-insensitiv via normalize)
+      const nText = normalize(text);
+      const nQuery = normalize(query);
+      if (!nText.includes(nQuery)) return text;
+      // bygg markering genom att hitta index i normaliserad sträng
+      const start = nText.indexOf(nQuery);
+      const end = start + nQuery.length;
+      // mappa tillbaka ungefär (ok för enkel MVP)
+      return text.substring(0, start) + '<mark>' +
+             text.substring(start, end) + '</mark>' +
+             text.substring(end);
+    }
+
+    function render() {
+      const hits = searchRules();
+      elCount.textContent = `${hits.length} träff${hits.length === 1 ? '' : 'ar'}`;
+
+      elResults.innerHTML = "";
+      hits.forEach(r => {
+        const item = document.createElement('article');
+        item.className = 'rk-item';
+        item.id = r.id; // för djuplänk
+
+        const pages = r.pages?.length ? ` · s.${r.pages.join(',')}` : '';
+        const tags = (r.tags||[]).map(t => `<span class="rk-tag">${t}</span>`).join(' ');
+
+        item.innerHTML = `
+          <h3 class="rk-title"><a href="#${r.id}" title="Länka till regeln">${r.title || 'Regel'}</a> <small>${r.rule_number ? '(Regel ' + r.rule_number + ')' : ''}${pages}</small></h3>
+          <p class="rk-body">${highlight(r.body || '', state.query)}</p>
+          <div class="rk-meta">${tags}</div>
+        `;
+        elResults.appendChild(item);
+      });
+    }
+
+    // Eventlyssnare
+    elSearch.addEventListener('input', e => {
+      state.query = e.target.value.trim();
+      render();
+    });
+
+    elRuleFilter.addEventListener('change', e => {
+      state.ruleFilter = e.target.value;
+      render();
+    });
+
+    elTagFilter.addEventListener('change', e => {
+      state.tagFilter = e.target.value;
+      render();
+    });
+
+    // Hantera hash-förändring (t.ex. när man klickar titel)
+    window.addEventListener('hashchange', () => {
+      const hashId = location.hash?.replace('#','');
+      const el = document.getElementById(hashId);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  </script>
+</body>
+</html>

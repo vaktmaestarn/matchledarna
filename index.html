@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matchledarna – Kunskap, Transparens, Gemenskap</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="main.js"></script>
+</head>
+<body>
+
+    <!-- HEADER / NAV -->
+    <header>
+        <div class="brand">
+            <div class="logo">Matchledarna</div>
+            <div class="tagline">Kunskap · Transparens · Gemenskap</div>
+        </div>
+        <nav id="nav-menu" class="">
+            <a href="index.html">Hem</a>
+            <a href="kunskap.html">Kunskap</a>
+            <a href="diskussion.html">Diskussion</a>
+            <a href="stod.html">Stöd</a>
+        </nav>
+        <button id="hamburger" aria-label="Öppna meny" aria-expanded="false" aria-controls="nav-menu">
+            ☰
+        </button>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero">
+            <h1>Välkommen till Matchledarna</h1>
+            <p>En plats för domare att lära, diskutera och stötta varandra – sport oberoende.</p>
+        </section>
+
+        <!-- HUVUDOMRÅDEN -->
+        <section class="sections">
+            <div class="section-card kunskap">
+                <h2>Kunskap</h2>
+                <p>Regler, quiz och matchscenarion för att vässa dina domarkunskaper.</p>
+                <a href="kunskap.html" class="btn btn-blue">Utforska</a>
+            </div>
+            <div class="section-card diskussion">
+                <h2>Diskussion</h2>
+                <p>Forum för att diskutera situationer, dela erfarenheter och ställa frågor.</p>
+                <a href="diskussion.html" class="btn btn-pink">Gå till forumet</a>
+            </div>
+            <div class="section-card stod">
+                <h2>Stöd</h2>
+                <p>Verktyg och resurser som hjälper dig i domarrollen.</p>
+                <a href="stod.html" class="btn btn-green">Se stöd</a>
+            </div>
+        </section>
+
+        <!-- Regelkollen-knapp under rutorna -->
+        <div class="regelkollen-fixed">
+            <a href="regelkollen.html" title="Regelkollen" aria-label="Gå till Regelkollen">
+                <!-- Cerise bandyboll -->
+                <svg width="60" height="60" viewBox="0 0 100 100" role="img" aria-label="Snabbknapp Regelkollen">
+                    <circle cx="50" cy="50" r="48" fill="#E91E63" stroke="#333" stroke-width="2"/>
+                </svg>
+            </a>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Matchledarna</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 800 400">
+  <!-- Bakgrund (transparent så gradienten från CSS syns igenom) -->
+  <rect width="800" height="400" fill="none"></rect>
+
+  <!-- Ytterlinjer -->
+  <rect x="10" y="10" width="780" height="380" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="4"></rect>
+
+  <!-- Mittlinje -->
+  <line x1="400" y1="10" x2="400" y2="390" stroke="red" stroke-opacity="0.15" stroke-width="3"></line>
+
+  <!-- Cirklar -->
+  <circle cx="400" cy="200" r="50" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="3"></circle>
+  <circle cx="100" cy="200" r="50" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="3"></circle>
+  <circle cx="700" cy="200" r="50" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="3"></circle>
+
+  <!-- Målområden -->
+  <rect x="10" y="120" width="50" height="160" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="3"></rect>
+  <rect x="740" y="120" width="50" height="160" fill="none" stroke="red" stroke-opacity="0.15" stroke-width="3"></rect>
+</svg>
